@@ -1,5 +1,6 @@
 """Config flow for Miner."""
 import logging
+import sys
 from importlib.metadata import version
 
 from .const import PYASIC_VERSION
@@ -15,16 +16,30 @@ def _ensure_pyasic():
     global pyasic, MinerNetwork, MinerMake
     if pyasic is not None:
         return
-    
-    try:
-        import pyasic as _pyasic
-        if version("pyasic") != PYASIC_VERSION:
-            raise ImportError("Version mismatch")
-    except (ImportError, Exception):
+
+    def try_import():
+        try:
+            import pyasic as _pyasic
+            if not hasattr(_pyasic, 'get_miner'):
+                raise ImportError("pyasic module incomplete")
+            if version("pyasic") != PYASIC_VERSION:
+                raise ImportError("Version mismatch")
+            return _pyasic
+        except Exception:
+            return None
+
+    _pyasic = try_import()
+    if _pyasic is None:
+        # Clear any cached broken imports before reinstalling
+        for mod_name in list(sys.modules.keys()):
+            if mod_name.startswith('pyasic'):
+                del sys.modules[mod_name]
+
         from .patch import install_package
-        install_package(f"pyasic=={PYASIC_VERSION}")
+        install_package(f"pyasic=={PYASIC_VERSION}", force_reinstall=True)
+
         import pyasic as _pyasic
-    
+
     pyasic = _pyasic
     from pyasic import MinerNetwork as _MinerNetwork
     MinerNetwork = _MinerNetwork
