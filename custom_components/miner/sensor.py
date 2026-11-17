@@ -3,12 +3,12 @@ from __future__ import annotations
 
 import logging
 
-from homeassistant.components.sensor import EntityCategory
 from homeassistant.components.sensor import SensorDeviceClass
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.components.sensor import SensorEntityDescription
 from homeassistant.components.sensor import SensorStateClass
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import EntityCategory
 from homeassistant.const import REVOLUTIONS_PER_MINUTE
 from homeassistant.const import UnitOfPower
 from homeassistant.const import UnitOfTemperature
